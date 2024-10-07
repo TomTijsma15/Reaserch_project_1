@@ -12,7 +12,7 @@ library(htmlwidgets)
 library(patchwork)
 
 ## set wroking directory
-setwd("~/Desktop/Research_project_1/Analysis")
+#setwd("~/Users/tom/Documents/Masters/_Github/Research_project_1")
 
 ## clearing workspace
 rm(list = ls())

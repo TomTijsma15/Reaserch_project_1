@@ -111,4 +111,3 @@ p4 <- ggraph(graph, layout = 'fr') +
   scale_color_manual(values = c('blue', 'red'), labels = c('Location', 'Ear Tag'))
 p4
 
-

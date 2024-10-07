@@ -12,7 +12,7 @@ library(ggrepel)
 library(htmlwidgets)
 
 ## set wroking directory
-setwd("~/Desktop/Research_project_1/Analysis")
+#setwd("~/Desktop/Research_project_1/Analysis")
 
 ## clearing workspace
 rm(list = ls())
