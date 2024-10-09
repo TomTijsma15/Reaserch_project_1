@@ -10,6 +10,9 @@ library(sf)
 library(ggrepel)
 library(htmlwidgets)
 library(patchwork)
+library(FSA)
+library(multcompView)
+library(rcompanion)
 
 ## set wroking directory
 #setwd("~/Users/tom/Documents/Masters/_Github/Research_project_1")
@@ -44,9 +47,10 @@ April_9 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")))
 ## create dataframe containing the median responses
 April_9_median <- April_9 %>%
-  group_by(Observation_id, Behavior) %>%
+  group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE),
-            Total_number_of_occurences = sum(Total_number_of_occurences, na.rm = TRUE))
+            #Total_number_of_occurences = sum(Total_number_of_occurences, na.rm = TRUE)
+            )
 
 
 
@@ -74,7 +78,7 @@ Maart_9 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")))
 ## create dataframe containing the median responses
 Maart_9_median <- Maart_9 %>%
-  group_by(Observation_id, Behavior) %>%
+  group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
             
 
@@ -102,7 +106,7 @@ April_4 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")))
 ## create dataframe containing the median responses
 April_4_median <- April_4 %>%
-  group_by(Observation_id, Behavior) %>%
+  group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
 
 
@@ -130,7 +134,7 @@ Juni_7 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_L
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")))
 ## create dataframe containing the median responses
 Juni_7_median <- Juni_7 %>%
-  group_by(Observation_id, Behavior) %>%
+  group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
 
 
@@ -158,192 +162,38 @@ Sep_23 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_L
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")))
 ## create dataframe containing the median responses
 Sep_23_median <- Sep_23 %>%
-  group_by(Observation_id, Behavior) %>%
+  group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
 
-## combine it all toghether in one dataframe
+## combine it all toghether in one da## combine it all together in one da## combine it all toghether in one dataframe
 all_dat <- bind_rows(
-  April_4, April_9, Juni_7, Maart_9, Sep_23)
+  April_4, April_9, Juni_7, Maart_9, Sep_23, new_rows)
 
-# Ethogram Plot mean duration-----------------------------------------------------------
-# 9 april
-P1 <- ggplot(data=April_9, aes(x=Behavior, y=Duration_mean_s, fill=Observation_id)) + 
+## combine the median into one dataframe
+all_dat_median <- bind_rows(
+  April_4_median, April_9_median, Juni_7_median, Maart_9_median, Sep_23_median)
+
+## add missing values in the dataframe
+new_rows <- data.frame(
+  Observation_id = c("Before", "During", "Before", "During", "Before", "After", "During", "During", "Before", "After", "Before", "During", "After", "Before", "After", "During", "After", "Before", "After", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "Before", "After", "Before", "After", "Before", "During", "During", "Before", "During", "During", "After", "Before", "During", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "After"),
+  Behavior = c("chasing females", "chasing females", "grazing", "grazing", "Hoof scraping", "Hoof scraping", "laying", "ruminating", "running", "running", "walking", "grazing", "grazing", "grouping", "grouping", "headbutting", "headbutting", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "other", "ruminating", "ruminating", "running", "running", "standing", "vocalizing", "vocalizing", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "ruminating", "ruminating", "grazing", "grazing", "running", "running", "scanning", "scanning", "standing", "standing", "vocalizing", "walking", "scanning", "scanning", "standing", "standing"),
+  Date = as.Date(c("2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-09-23", "2023-09-23", "2023-09-23", "2023-09-23")),
+  median_Total_duration = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) # Setting the duration to 0 for the missing events
+  )
+
+all_dat_median1 <- rbind(all_dat_median, new_rows)
+
+
+
+# Plots -------------------------------------------------------------------
+P1 <- ggplot(data=all_dat, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
   geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
   theme_minimal() +
-  ggtitle("9 April") + 
-  labs(x = "Behavior", y = "Mean Duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  ggtitle("total time of different behaviors") + 
+  labs(x = "Behavior", y = "Total time (s)", fill = "Observation Period") +  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
 P1
-
-# 4 april
-P2 <- ggplot(data=April_4, aes(x=Behavior, y=Duration_mean_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() +
-  ggtitle("4 April") + 
-  labs(x = "Behavior", y = "Mean Duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P2
-
-# 9 maart
-P3 <- ggplot(data=Maart_9, aes(x=Behavior, y=Duration_mean_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("9 Maart") + 
-  labs(x = "Behavior", y = "Mean Duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P3
-
-# 7 juni
-P4 <- ggplot(data=Juni_7, aes(x=Behavior, y=Duration_mean_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("7 Juni") + 
-  labs(x = "Behavior", y = "Mean Duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P4
-
-# 23 september
-P5 <- ggplot(data=Sep_23, aes(x=Behavior, y=Duration_mean_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("23 September") + 
-  labs(x = "Behavior", y = "Mean Duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P5
-
-## combi plot
-P_combi <- (P1 + P2 + P3 + P4 + P5) + 
-  plot_layout(ncol = 2, nrow = 3)
-P_combi
-
-
-
-# Ethogram Plot total duration --------------------------------------------
-
-# 9 april
-P6 <- ggplot(data=April_9, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() +
-  ggtitle("9 April") + 
-  labs(x = "Behavior", y = "Total duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P6
-
-# 4 april
-P7 <- ggplot(data=April_4, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() +
-  ggtitle("4 April") + 
-  labs(x = "Behavior", y = "Total duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P7
-
-# 9 maart
-P8 <- ggplot(data=Maart_9, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("9 Maart") + 
-  labs(x = "Behavior", y = "Total duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P8
-
-# 7 juni
-P9 <- ggplot(data=Juni_7, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("7 Juni") + 
-  labs(x = "Behavior", y = "Total duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P9
-
-# 23 september
-P10 <- ggplot(data=Sep_23, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("23 September") + 
-  labs(x = "Behavior", y = "Total duration (s)", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P10
-
-## combi plot
-P_combi_2 <- (P6 + P7 + P8 + P9 + P10) + 
-  plot_layout(ncol = 2, nrow = 3)
-P_combi_2
-
-
-
-# Ethogram Plot percentage of time ----------------------------------------
-# 9 april
-P11 <- ggplot(data=April_9, aes(x=Behavior, y=P_of_total_length, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() +
-  ggtitle("9 April") + 
-  labs(x = "Behavior", y = "Percentage of total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P11
-
-# 4 april
-P12 <- ggplot(data=April_4, aes(x=Behavior, y=P_of_total_length, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() +
-  ggtitle("4 April") + 
-  labs(x = "Behavior", y = "Percentage of total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P12
-
-# 9 maart
-P13 <- ggplot(data=Maart_9, aes(x=Behavior, y=P_of_total_length, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("9 Maart") +  labs(x = "Behavior", y = "Percentage of total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P13
-
-# 7 juni
-P14 <- ggplot(data=Juni_7, aes(x=Behavior, y=P_of_total_length, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("7 Juni") + 
-  labs(x = "Behavior", y = "Percentage of total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P14
-
-# 23 september
-P15 <- ggplot(data=Sep_23, aes(x=Behavior, y=P_of_total_length, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_errorbar(aes(ymin=Duration_mean_s - Duration_std_dev, ymax=Duration_mean_s + Duration_std_dev),  position=position_dodge(0.9), width=0.25) + 
-  theme_minimal() + 
-  ggtitle("23 September") + 
-  labs(x = "Behavior", y = "Percentage of total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P15
-
-## combi plot
-P_combi_3 <- (P11 + P12 + P13 + P14 + P15) + 
-  plot_layout(ncol = 2, nrow = 3)
-P_combi_3
-
-
-
-P_combi
-P_combi_2
-P_combi_3
-
-
 
 # Plot of percentage of time with error bars ------------------------------
 # Grouping the data by Behavior and Observation_id to calculate mean and SD for percentage of time
@@ -372,86 +222,32 @@ P0
 
 
 # total behavior of all dates ---------------------------------------------
-
-all_dat_summary <- all_dat %>%
-  group_by(Behavior, Observation_id) %>%
-  dplyr::summarize(
-    Mean_Percentage_Time = mean(P_of_total_length, na.rm = TRUE), 
-    SD_Percentage_Time = sd(P_of_total_length, na.rm = TRUE),
-    Total_number_of_occurences = sum(Total_number_of_occurences, na.rm = TRUE)
-  ) %>%
-  ungroup()
-
-
-
-# Plotting with error bars
-P100 <- ggplot(data = all_dat_summary, aes(x = Behavior, y = Mean_Percentage_Time, fill = Observation_id)) + 
-  geom_col(position = "dodge") + 
-  geom_errorbar(aes(ymin = pmax(0, Mean_Percentage_Time - SD_Percentage_Time), 
-                    ymax = pmin(100, Mean_Percentage_Time + SD_Percentage_Time)), 
-                position = position_dodge(0.9), width = 0.25) + 
-  geom_text(aes(label = paste("n =", Total_number_of_occurences), y= 0),
-            position = position_dodge(0.9), 
-            vjust = -0.5, size = 2.5) +  
-  theme_minimal() +
-  ggtitle("Total Percentage of Total Time per Behavior") +
-  labs(x = "Behavior", y = "Mean Percentage of Total Time (%)", fill = "Observation Period") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  ylim(0,100)
-P100
-
-# median plots of total time --------------------------------------
-
-# 9 april
-P20 <- ggplot(data=April_9_median, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  #geom_text(aes(label = paste("n =", Total_number_of_occurences), y= 0),
-            #position = position_dodge(0.9), 
-            #vjust = -0.5, size = 2.5) +
-  theme_minimal() +
-  ggtitle("9 April") + 
-  labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P20
-
-
-# 4 april
-P21 <- ggplot(data=April_4_median, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
+#plot
+P01 <- ggplot(data=all_dat_median1, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("4 April") + 
+  ggtitle("Median time of different behaviors") + 
   labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P21
+  #facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
+P01
 
-# 9 maart
-P22 <- ggplot(data=Maart_9_median, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  theme_minimal() +
-  ggtitle("9 maart") + 
-  labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P22
 
-# 7 juni
-P23 <- ggplot(data=Juni_7_median, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  theme_minimal() +
-  ggtitle("7 juni") + 
-  labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P23
+# non-parametric test for median duration of behavior ---------------------
+# kruskal wallis test (non parametric ANOVA)
+kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median1)
 
-# 23 eptember
-P24 <- ggplot(data=Sep_23_median, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  theme_minimal() +
-  ggtitle("23 september") + 
-  labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P24
+# post hoc test, Dunns test
+dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
 
-P_combi_4 <- (P20 + P21 + P22 + P23 + P24) + 
-  plot_layout(ncol = 2, nrow = 3)
-P_combi_4
+## schreider ray hare test for behavior and event cause it is two way
+scheirerRayHare(median_Total_duration ~ Observation_id + Behavior, data = all_dat_median1)
+# post hoc, dunns test EVENT
+dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
+# post hoc, dunns test BEHAVIOR
+dunnTest(median_Total_duration ~ Behavior, data = all_dat_median1, method = "bonferroni")
+
+
+
+
 
