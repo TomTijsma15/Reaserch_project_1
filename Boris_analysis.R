@@ -181,7 +181,10 @@ new_rows <- data.frame(
   median_Total_duration = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) # Setting the duration to 0 for the missing events
   )
 
-all_dat_median1 <- rbind(all_dat_median, new_rows)
+all_dat_median1 <- rbind(all_dat_median, new_rows) %>%
+  mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")),
+         Behavior = factor(Behavior)
+  )
 
 
 
@@ -189,36 +192,11 @@ all_dat_median1 <- rbind(all_dat_median, new_rows)
 P1 <- ggplot(data=all_dat, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("total time of different behaviors") + 
+  ggtitle("total time of  behaviors") + 
   labs(x = "Behavior", y = "Total time (s)", fill = "Observation Period") +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
 facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
 P1
-
-# Plot of percentage of time with error bars ------------------------------
-# Grouping the data by Behavior and Observation_id to calculate mean and SD for percentage of time
-April_9_summary <- all_dat %>%
-  filter(Date == "2023-04-09") %>%  # Make sure to filter by the correct date column
-  group_by(Behavior, Observation_id) %>%
-  summarize(
-    Mean_Percentage_Time = mean(P_of_total_length, na.rm = TRUE), 
-    SD_Percentage_Time = sd(P_of_total_length, na.rm = TRUE)
-  ) %>%
-  ungroup()
-
-
-# Plotting with error bars
-P0 <- ggplot(data = April_9_summary, aes(x = Behavior, y = Mean_Percentage_Time, fill = Observation_id)) + 
-  geom_col(position = "dodge") + 
-  geom_errorbar(aes(ymin = pmax(0, Mean_Percentage_Time - SD_Percentage_Time), 
-                    ymax = pmin(100, Mean_Percentage_Time + SD_Percentage_Time)), 
-                position = position_dodge(0.9), width = 0.25) + 
-  theme_minimal() +
-  ggtitle("Percentage of Total Time per Behavior") +
-  labs(x = "Behavior", y = "Mean Percentage of Total Time (%)", fill = "Observation Period") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P0
-
 
 
 # total behavior of all dates ---------------------------------------------
@@ -226,12 +204,11 @@ P0
 P01 <- ggplot(data=all_dat_median1, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("Median time of different behaviors") + 
+  ggtitle("Median time of  behaviors") + 
   labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  #facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
 P01
-
 
 # non-parametric test for median duration of behavior ---------------------
 # kruskal wallis test (non parametric ANOVA)
@@ -241,7 +218,7 @@ kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median1)
 dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
 
 ## schreider ray hare test for behavior and event cause it is two way
-scheirerRayHare(median_Total_duration ~ Observation_id + Behavior, data = all_dat_median1)
+scheirerRayHare(median_Total_duration ~ Observation_id + Behavior + Date, data = all_dat_median1)
 # post hoc, dunns test EVENT
 dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
 # post hoc, dunns test BEHAVIOR

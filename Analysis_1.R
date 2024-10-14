@@ -10,6 +10,7 @@ library(ggmap)
 library(sf)
 library(ggrepel)
 library(htmlwidgets)
+library(igraph)
 
 ## set wroking directory
 #setwd("~/Desktop/Research_project_1/Analysis")
@@ -183,8 +184,8 @@ Hart_data <- bind_rows(DB, DP, DP2, FP, HEK, HV, K1, K2, K3, KR, LBE, Pick, R2, 
 # Eartag Analysis NO MAP ---------------------------------------------------------
 
 Eartag_Dat <- Hart_data %>%
-  filter(Location !='Wilgenbosje') %>%
-  filter(Location !='Landbouwenclave') %>%
+  #filter(Location !='Wilgenbosje') %>%
+  #filter(Location !='Landbouwenclave') %>%
   filter(!is.na(Eartag_N))
 
 # Create a bipartite graph
@@ -225,15 +226,15 @@ map
 
 # Prepare spatial data for mapping
 locations <- Eartag_Dat %>%
-  select(Location, Lat, Lon) %>%
+  dplyr::select(Location, Lat, Lon) %>%
   distinct()
 
 # Assuming ear tags have the same location coordinates, add slight offset
 ear_tags <- Eartag_Dat %>%
   distinct(Eartag_N, .keep_all = TRUE) %>%
-  mutate(Lat = Lat + runif(n(), -0.002, 0.002),  # Slight random offset for visibility
+  dplyr::mutate(Lat = Lat + runif(n(), -0.002, 0.002),  # Slight random offset for visibility
          Lon = Lon + runif(n(), -0.002, 0.002)) %>%
-  select(Eartag_N, Lat, Lon) %>%
+  dplyr::select(Eartag_N, Lat, Lon) %>%
   distinct()
 
 # Create an sf object for locations and ear tags
@@ -262,8 +263,8 @@ map <- leaflet() %>%
 for (i in 1:nrow(edges)) {
   from <- edges$from[i]
   to <- edges$to[i]
-  from_coords <- locations %>% filter(Location == from) %>% select(Lon, Lat)
-  to_coords <- ear_tags %>% filter(Eartag_N == to) %>% select(Lon, Lat)
+  from_coords <- locations %>% dplyr::filter(Location == from) %>% dplyr::select(Lon, Lat)
+  to_coords <- ear_tags %>% dplyr::filter(Eartag_N == to) %>% dplyr::select(Lon, Lat)
   map <- map %>%
     addPolylines(
       lng = c(from_coords$Lon, to_coords$Lon),
@@ -276,6 +277,169 @@ for (i in 1:nrow(edges)) {
 
 # Print the map
 map
+
+## with distinct lines
+
+# Prepare spatial data for mapping (locations without offsets)
+locations <- Eartag_Dat %>%
+  dplyr::select(Location, Lat, Lon) %>%
+  distinct()
+
+# Apply random offsets to the ear tag locations for visibility
+ear_tags_offset <- Eartag_Dat %>%
+  distinct(Eartag_N, Location, .keep_all = TRUE) %>%
+  dplyr::mutate(Lat = Lat + runif(n(), -0.001, 0.001),  # Slight random offset for visibility
+                Lon = Lon + runif(n(), -0.001, 0.001)) %>%
+  dplyr::select(Eartag_N, Lat, Lon) %>%
+  distinct()
+
+# Create an sf object for locations (without offsets) and ear tags (with offsets)
+locations_sf <- st_as_sf(locations, coords = c("Lon", "Lat"), crs = 4326)
+ear_tags_sf <- st_as_sf(ear_tags_offset, coords = c("Lon", "Lat"), crs = 4326)
+
+# Create edges dataframe that will store pairs of locations visited by the same ear tag
+edges <- Eartag_Dat %>%
+  dplyr::group_by(Eartag_N) %>%
+  dplyr::arrange(Eartag_N, Location) %>%
+  dplyr::mutate(Next_Location = lead(Location),
+                Next_Lat = lead(Lat),
+                Next_Lon = lead(Lon)) %>%
+  dplyr::filter(!is.na(Next_Location)) %>%
+  dplyr::select(Eartag_N, Location, Lat, Lon, Next_Location, Next_Lat, Next_Lon)
+
+# Create the leaflet map
+map <- leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    data = locations_sf,
+    label = ~Location,
+    color = "blue",
+    radius = 6,
+    fillOpacity = 0.5
+  ) %>%
+  addCircleMarkers(
+    data = ear_tags_sf,
+    label = ~Eartag_N,
+    color = "red",
+    radius = 6,
+    fillOpacity = 0.5
+  )
+
+# Add polylines using real (non-offset) coordinates to show movements between locations
+for (i in 1:nrow(edges)) {
+  from_coords <- c(edges$Lon[i], edges$Lat[i])  # Actual coordinates of first location
+  to_coords <- c(edges$Next_Lon[i], edges$Next_Lat[i])  # Actual coordinates of second location
+  
+  map <- map %>%
+    addPolylines(
+      lng = c(from_coords[1], to_coords[1]),
+      lat = c(from_coords[2], to_coords[2]),
+      color = "gray",
+      weight = 2,
+      opacity = 0.7
+    )
+}
+
+# Print the map
+map
+
+
+# Connectivity test -------------------------------------------------------
+# Create edge list: pairs of locations visited by the same individual (ear tags)
+edges <- Eartag_Dat %>%
+  dplyr::group_by(Eartag_N) %>%
+  dplyr::arrange(Eartag_N, Location) %>%
+  dplyr::mutate(Next_Location = lead(Location)) %>%
+  dplyr::filter(!is.na(Next_Location)) %>%
+  dplyr::ungroup() %>%   # Ungroup to remove the Eartag_N grouping
+  dplyr::select(Location, Next_Location) %>%
+  distinct()
+
+# Convert to a matrix with two columns
+edge_list <- as.matrix(edges)
+
+# Create the graph object using the edge list
+g <- graph_from_edgelist(edge_list, directed = FALSE)
+
+# Plot the graph to visualize the connectivity
+plot(g, vertex.label = V(g)$name, vertex.color = "lightblue", edge.color = "gray")
+
+is_connected(g)
+# Returns TRUE if all locations are connected, FALSE if there are disconnected components.
+components <- components(g)
+# Print the membership of each component (which locations belong to which group)
+components$membership
+degree(g)
+# Shows the number of connections each location has.
+shortest_paths(g, from = "Koeienrustplaats", to = "Kapvlakte_II")
+transitivity(g, type = "global")
+# Gives the overall clustering coefficient of the graph.
+
+## get the number of eartags per location
+# Summarize unique ear tags per location
+location_eartag_counts <- Eartag_Dat %>%
+  group_by(Location) %>%
+  summarise(Unique_Eartag_Count = n_distinct(Eartag_N)) %>%
+  ungroup()
+
+# Plot the number of unique ear tags per location
+P4 <- ggplot(data= location_eartag_counts, aes(x=Location, y=Unique_Eartag_Count)) +
+  geom_bar(stat="identity", fill="blue") +
+  annotate("text", x = 1, y = location_eartag_counts$Unique_Eartag_Count[1] + 1, label = "4", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 2, y = location_eartag_counts$Unique_Eartag_Count[2] + 1, label = "4", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 3, y = location_eartag_counts$Unique_Eartag_Count[3] + 1, label = "8", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 4, y = location_eartag_counts$Unique_Eartag_Count[4] + 1, label = "3", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 5, y = location_eartag_counts$Unique_Eartag_Count[5] + 1, label = "11", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 6, y = location_eartag_counts$Unique_Eartag_Count[6] + 1, label = "11", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 7, y = location_eartag_counts$Unique_Eartag_Count[7] + 1, label = "11", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 8, y = location_eartag_counts$Unique_Eartag_Count[8] + 1, label = "7", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 9, y = location_eartag_counts$Unique_Eartag_Count[9] + 1, label = "11", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 10, y = location_eartag_counts$Unique_Eartag_Count[10] + 1, label = "3", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 11, y = location_eartag_counts$Unique_Eartag_Count[11] + 1, label = "8", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 12, y = location_eartag_counts$Unique_Eartag_Count[12] + 1, label = "9", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 13, y = location_eartag_counts$Unique_Eartag_Count[13] + 1, label = "7", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 14, y = location_eartag_counts$Unique_Eartag_Count[14] + 1, label = "2", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 15, y = location_eartag_counts$Unique_Eartag_Count[15] + 1, label = "13", size = 3.5, vjust = -0.5) +
+  
+  labs(title = "Number of Unique Ear Tags per Location",
+       x = "Location",
+       y = "Number of Unique Ear Tags") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+P4
+
+P5 <- ggplot(location_eartag_counts, aes(x=c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), y=Unique_Eartag_Count)) + 
+  geom_point() + geom_smooth(method="lm") + 
+  labs(title = "Number of Unique Ear Tags per Location",
+       x = "Number of connections",
+       y = "Number of Unique Ear Tags") +
+  theme_minimal()
+P5
+
+# Fit a linear model to the data
+lm_model <- lm(Unique_Eartag_Count ~ c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), data = location_eartag_counts)
+summary(lm_model)
+# Extract the R-squared value from the model summary
+r_squared <- summary(lm_model)$r.squared
+
+# P5 plus r^2
+P6 <- ggplot(location_eartag_counts, aes(x = c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), y = Unique_Eartag_Count)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  
+  # Add the R-squared value as an annotation
+  annotate("text", x = 10, y = max(location_eartag_counts$Unique_Eartag_Count) + 1, 
+           label = paste("R² =", round(r_squared, 2)), 
+           size = 5, hjust = 0) +
+  
+  labs(title = "Number of Unique Ear Tags per Location",
+       x = "Number of connections",
+       y = "Number of Unique Ear Tags") +
+  theme_minimal()
+
+P6
+
 
 # Eartag analysis by month WITH MAP ------------------------------------------------
 
