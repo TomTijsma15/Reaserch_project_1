@@ -51,7 +51,11 @@ April_9_median <- April_9 %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE),
             #Total_number_of_occurences = sum(Total_number_of_occurences, na.rm = TRUE)
             )
-
+## create dataframe containing the median percentage of time
+April_9_median_P <- April_9 %>%
+  group_by(Observation_id, Behavior, Date) %>%
+  summarise(median_P = median(P_of_total_length, na.rm = TRUE),
+            )
 
 
 ## 9 maart
@@ -80,6 +84,11 @@ Maart_9 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_
 Maart_9_median <- Maart_9 %>%
   group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
+## create dataframe containing the median percentage of time
+Maart_9_median_P <- Maart_9 %>%
+  group_by(Observation_id, Behavior, Date) %>%
+  summarise(median_P = median(P_of_total_length, na.rm = TRUE),
+  )
             
 
 ## 4 april
@@ -108,6 +117,11 @@ April_4 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_
 April_4_median <- April_4 %>%
   group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
+## create dataframe containing the median percentage of time
+April_4_median_P <- April_4 %>%
+  group_by(Observation_id, Behavior, Date) %>%
+  summarise(median_P = median(P_of_total_length, na.rm = TRUE),
+  )
 
 
 ## 7 juni
@@ -136,6 +150,11 @@ Juni_7 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_L
 Juni_7_median <- Juni_7 %>%
   group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
+## create dataframe containing the median percentage of time
+Juni_7_median_P <- Juni_7 %>%
+  group_by(Observation_id, Behavior, Date) %>%
+  summarise(median_P = median(P_of_total_length, na.rm = TRUE),
+  )
 
 
 ## 23 september
@@ -164,31 +183,78 @@ Sep_23 <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRn-t03PCU_L
 Sep_23_median <- Sep_23 %>%
   group_by(Observation_id, Behavior, Date) %>%
   summarise(median_Total_duration = median(Total_duration_s, na.rm = TRUE))
+## create dataframe containing the median percentage of time
+Sep_23_median_P <- Sep_23 %>%
+  group_by(Observation_id, Behavior, Date) %>%
+  summarise(median_P = median(P_of_total_length, na.rm = TRUE),
+  )
 
 ## combine it all toghether in one da## combine it all together in one da## combine it all toghether in one dataframe
 all_dat <- bind_rows(
-  April_4, April_9, Juni_7, Maart_9, Sep_23, new_rows)
+  April_4, April_9, Juni_7, Maart_9, Sep_23)
 
 ## combine the median into one dataframe
 all_dat_median <- bind_rows(
   April_4_median, April_9_median, Juni_7_median, Maart_9_median, Sep_23_median)
 
-## add missing values in the dataframe
+## combine the median percentage of time into one dataframe
+all_dat_median_P <- bind_rows(
+  April_4_median_P, April_9_median_P, Juni_7_median_P, Maart_9_median_P, Sep_23_median_P)
+
+## add missing values in the dataframe medians
 new_rows <- data.frame(
   Observation_id = c("Before", "During", "Before", "During", "Before", "After", "During", "During", "Before", "After", "Before", "During", "After", "Before", "After", "During", "After", "Before", "After", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "Before", "After", "Before", "After", "Before", "During", "During", "Before", "During", "During", "After", "Before", "During", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "After"),
   Behavior = c("chasing females", "chasing females", "grazing", "grazing", "Hoof scraping", "Hoof scraping", "laying", "ruminating", "running", "running", "walking", "grazing", "grazing", "grouping", "grouping", "headbutting", "headbutting", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "other", "ruminating", "ruminating", "running", "running", "standing", "vocalizing", "vocalizing", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "ruminating", "ruminating", "grazing", "grazing", "running", "running", "scanning", "scanning", "standing", "standing", "vocalizing", "walking", "scanning", "scanning", "standing", "standing"),
   Date = as.Date(c("2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-09-23", "2023-09-23", "2023-09-23", "2023-09-23")),
   median_Total_duration = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) # Setting the duration to 0 for the missing events
   )
+## add missing rows dataframe Percentage of time
+new_rows_P <- data.frame(
+  Observation_id = c("Before", "During", "Before", "During", "Before", "After", "During", "During", "Before", "After", "Before", "During", "After", "Before", "After", "During", "After", "Before", "After", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "Before", "After", "Before", "After", "Before", "During", "During", "Before", "During", "During", "After", "Before", "During", "Before", "During", "During", "After", "Before", "During", "Before", "After", "During", "After"),
+  Behavior = c("chasing females", "chasing females", "grazing", "grazing", "Hoof scraping", "Hoof scraping", "laying", "ruminating", "running", "running", "walking", "grazing", "grazing", "grouping", "grouping", "headbutting", "headbutting", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "other", "ruminating", "ruminating", "running", "running", "standing", "vocalizing", "vocalizing", "Hoof scraping", "Hoof scraping", "laying", "laying", "other", "ruminating", "ruminating", "grazing", "grazing", "running", "running", "scanning", "scanning", "standing", "standing", "vocalizing", "walking", "scanning", "scanning", "standing", "standing"),
+  Date = as.Date(c("2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-09", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2023-04-04", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2024-03-09", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-06-07", "2023-09-23", "2023-09-23", "2023-09-23", "2023-09-23")),
+  median_P = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) # Setting the duration to 0 for the missing events
+)
 
+## add new rows with 0's to the median dataframe
 all_dat_median1 <- rbind(all_dat_median, new_rows) %>%
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")),
          Behavior = factor(Behavior)
   )
 
+## add the new rows with 0's to the percentage of time dataframe
+all_dat_median_P1 <- rbind(all_dat_median_P, new_rows_P) %>%
+  mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")),
+         Behavior = factor(Behavior)
+  )
 
 
-# Plots -------------------------------------------------------------------
+# Create the new dataframe by summarizing behaviors median percantage of time
+all_dat_median2 <- all_dat_median1 %>%
+  dplyr::mutate(Behavior_group = case_when(
+    Behavior %in% c("Hoof scraping", "headbutting", "chasing females") ~ "agitated",
+    Behavior %in% c("scanning", "vocalizing", "grouping") ~ "vigilant",
+    Behavior %in% c("laying", "ruminating", "grazing", "standing") ~ "non-vigilant",
+    TRUE ~ Behavior  # walking, running, and other remain the same
+  )) %>%
+  dplyr::group_by(Observation_id, Date, Behavior_group) %>%
+  dplyr::summarize(median_Total_duration = sum(median_Total_duration, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+# Create the new dataframe by summarizing behaviors median percantage of time
+all_dat_median_P2 <- all_dat_median_P1 %>%
+  dplyr::mutate(Behavior_group = case_when(
+    Behavior %in% c("Hoof scraping", "headbutting", "chasing females") ~ "agitated",
+    Behavior %in% c("scanning", "vocalizing", "grouping") ~ "vigilant",
+    Behavior %in% c("laying", "ruminating", "grazing", "standing") ~ "non-vigilant",
+    TRUE ~ Behavior  # walking, running, and other remain the same
+  )) %>%
+  dplyr::group_by(Observation_id, Date, Behavior_group) %>%
+  dplyr::summarize(median_P = sum(median_P, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+
+# all data plot -------------------------------------------------------------------
 P1 <- ggplot(data=all_dat, aes(x=Behavior, y=Total_duration_s, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
@@ -199,32 +265,75 @@ facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for
 P1
 
 
-# total behavior of all dates ---------------------------------------------
-#plot
-P01 <- ggplot(data=all_dat_median1, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
+# median plots  ---------------------------------------------
+# median behavior total time grouped
+P2 <- ggplot(data=all_dat_median2, aes(x=Behavior_group, y=median_Total_duration, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("Median time of  behaviors") + 
-  labs(x = "Behavior", y = "median total time", fill = "Observation Period") +  
+  ggtitle("Median time of behaviors") + 
+  labs(x = "Behavior", y = "Median total time", fill = "Observation Period") +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_wrap(~ Date, scales = "free_x")  # Facet by Date, with separate scales for x-axis
-P01
+  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
+  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median2$Behavior_group)) - 0.5, by = 1), 
+             linetype = "dotted", color = "black", linewidth = 0.5) + 
+  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
+        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
+
+
+P2
+# median behavior total time ungrouped
+
+P2.5 <- ggplot(data=all_dat_median1, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
+  geom_col(position="dodge") + 
+  theme_minimal() +
+  ggtitle("Median time of behaviors") + 
+  labs(x = "Behavior", y = "Median total time", fill = "Observation Period") +  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
+  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median2$Behavior_group)) - 0.5, by = 1), 
+             linetype = "dotted", color = "black", linewidth = 0.5) + 
+  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
+        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
+
+
+P2.5
+# median behavior percentage of time grouped
+P3 <- ggplot(data=all_dat_median_P2, aes(x=Behavior_group, y=median_P, fill=Observation_id)) + 
+  geom_col(position="dodge") + 
+  theme_minimal() +
+  ggtitle("Median percentage time of behaviors") + 
+  labs(x = "Behavior", y = "Median percentage of time", fill = "Observation Period") +  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
+  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median_p2$Behavior_group)) - 0.5, by = 1), 
+             linetype = "dotted", color = "black", linewidth = 0.5) + 
+  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
+        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
+
+
+P3
+# median behavior percentage of time ungrouped
+P3.5 <- ggplot(data=all_dat_median_P1, aes(x=Behavior, y=median_P, fill=Observation_id)) + 
+  geom_col(position="dodge") + 
+  theme_minimal() +
+  ggtitle("Median percentage time of behaviors") + 
+  labs(x = "Behavior", y = "Median percentage of time", fill = "Observation Period") +  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
+  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median_p2$Behavior_group)) - 0.5, by = 1), 
+             linetype = "dotted", color = "black", linewidth = 0.5) + 
+  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
+        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
+
+
+P3.5
 
 # non-parametric test for median duration of behavior ---------------------
 # kruskal wallis test (non parametric ANOVA)
-kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median1)
+kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median2)
 
 # post hoc test, Dunns test
-dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
-
-## schreider ray hare test for behavior and event cause it is two way
-scheirerRayHare(median_Total_duration ~ Observation_id + Behavior + Date, data = all_dat_median1)
-# post hoc, dunns test EVENT
-dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median1, method = "bonferroni")
-# post hoc, dunns test BEHAVIOR
-dunnTest(median_Total_duration ~ Behavior, data = all_dat_median1, method = "bonferroni")
-
-
+dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median2, method = "bonferroni")
 
 
 

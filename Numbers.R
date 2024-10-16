@@ -51,10 +51,10 @@ sample_sizes <- bef_af1 %>%
 # boxplot number of animals
 P1 <- ggplot(bef_af1, aes(x = Event, y = N_Animals)) +
   geom_boxplot() +
-  geom_jitter(width = 0.2, alpha = 0.5) +
-  labs(title = "Number of animals per frame at Koeienrustplaats (N=3)",
-       x = "Event",
-       y = " Maximum number of Galloway per frame",
+  geom_jitter(width = 0.15, alpha = 0.5) +
+  labs(title = "Number of Galloway in frame/video for different wolf events",
+       x = " Wolf event",
+       y = " Maximum number of Galloway in frame/video",
        fill = "Location") +  # Changed color to fill for legend
   theme_minimal() +                 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -89,44 +89,3 @@ P1.2 <- P1.1 +
   geom_text(data = sample_sizes, aes(x = Event, y = 0, label = paste("n =", N)), 
             vjust = -0.5, color = "black", size = 3)
 P1.2
-
-
-# mean number of animals per date -----------------------------------------
-
-# boxplot number of animals per date
-P2 <- ggplot(bef_af1, aes(x = Event, y = N_Animals)) +
-  geom_boxplot() +
-  geom_jitter(aes(color= as.factor(Date)), width = 0.2, alpha = 0.5) +
-  labs(title = "number of animals per frame at Koeienrustplaats",
-       x = "Event",
-       y = "Number of Galloway",
-       fill = "Location") +  # Changed color to fill for legend
-  theme_minimal() +                 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-P2
-
-# mean number of bulls ----------------------------------------------------
-
-P3 <- ggplot(Bef_af, aes(x = Event, y = N_Bulls, fill = Location)) +
-  geom_boxplot() +
-  geom_jitter(width = 0.2, alpha = 0.5) +
-  labs(title = "number of Bulls per video",
-       x = "Event",
-       y = "Number of Bulls",
-       fill = "Location") +  # Changed color to fill for legend
-  theme_minimal() +                 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-
-P3
-
-P3 <- ggplot(Bef_af, aes(x = Event, y = N_Bulls, fill = Location)) +
-  stat_summary(fun = "mean", geom = "col", position = "dodge") +
-  stat_summary(fun.data = "mean_cl_boot", geom = "errorbar", width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Mean Number of Bulls",
-       x = "Event",
-       y = "Mean Number of Bulls",
-       fill = "Location") +
-  theme_minimal() +                 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-P3
