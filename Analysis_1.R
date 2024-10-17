@@ -196,7 +196,7 @@ graph <- graph_from_data_frame(edges, directed = FALSE)
 V(graph)$type <- bipartite_mapping(graph)$type
 
 # Plotting the graph with "Wilgenbosje
-p3 <- ggraph(graph, layout = 'fr') + 
+p1 <- ggraph(graph, layout = 'fr') + 
   geom_edge_link(aes(edge_alpha = 0.5), show.legend = FALSE) + 
   geom_node_point(aes(color = V(graph)$type), size = 5) +
   geom_node_text(aes(label = name), repel = TRUE) +
@@ -204,7 +204,7 @@ p3 <- ggraph(graph, layout = 'fr') +
   labs(title = "Network of Galloway  Ear Tags",
        color = "Type") +
   scale_color_manual(values = c('blue', 'red'), labels = c('Location', 'Ear Tag'))
-p3
+p1
 
 
 # map of camera locations -------------------------------------------------
@@ -372,35 +372,38 @@ components$membership
 degree(g)
 # Shows the number of connections each location has.
 shortest_paths(g, from = "Koeienrustplaats", to = "Kapvlakte_II")
-transitivity(g, type = "global")
-# Gives the overall clustering coefficient of the graph.
+transitivity(g, type = "global") # Gives the overall clustering coefficient of the graph.
+transitivity(g, type = "local") # Gives the overall clustering coefficient of the graph.
+transitivity(g, type = "average") # Gives the overall clustering coefficient of the graph.
+
+
 
 ## get the number of eartags per location
-# Summarize total number of ear tag observations per location
+# Summarize unique ear tags per location
 location_eartag_counts <- Eartag_Dat %>%
   group_by(Location) %>%
-  summarise(Total_Eartag_Observations = n()) %>%
+  summarise(Unique_Eartag_Count = n_distinct(Eartag_N)) %>%
   ungroup()
 
 
 # Plot the number of unique ear tags per location
-P4 <- ggplot(data= location_eartag_counts, aes(x=Location, y=Total_Eartag_Observations)) +
+P4 <- ggplot(data= location_eartag_counts, aes(x=Location, y=Unique_Eartag_Count)) +
   geom_bar(stat="identity", fill="blue") +
-  annotate("text", x = 1, y = location_eartag_counts$Total_Eartag_Observations[1] + 1, label = "4", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 2, y = location_eartag_counts$Total_Eartag_Observations[2] + 1, label = "4", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 3, y = location_eartag_counts$Total_Eartag_Observations[3] + 1, label = "8", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 4, y = location_eartag_counts$Total_Eartag_Observations[4] + 1, label = "3", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 5, y = location_eartag_counts$Total_Eartag_Observations[5] + 1, label = "11", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 6, y = location_eartag_counts$Total_Eartag_Observations[6] + 1, label = "11", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 7, y = location_eartag_counts$Total_Eartag_Observations[7] + 1, label = "11", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 8, y = location_eartag_counts$Total_Eartag_Observations[8] + 1, label = "7", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 9, y = location_eartag_counts$Total_Eartag_Observations[9] + 1, label = "11", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 10, y = location_eartag_counts$Total_Eartag_Observations[10] + 1, label = "3", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 11, y = location_eartag_counts$Total_Eartag_Observations[11] + 1, label = "8", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 12, y = location_eartag_counts$Total_Eartag_Observations[12] + 1, label = "9", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 13, y = location_eartag_counts$Total_Eartag_Observations[13] + 1, label = "7", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 14, y = location_eartag_counts$Total_Eartag_Observations[14] + 1, label = "2", size = 3.5, vjust = -0.5) +
-  annotate("text", x = 15, y = location_eartag_counts$Total_Eartag_Observations[15] + 1, label = "13", size = 3.5, vjust = -0.5) +
+  annotate("text", x = 1, y = location_eartag_counts$Unique_Eartag_Count[1] + 1, label = "4", size = 2, vjust = -0.5) +
+  annotate("text", x = 2, y = location_eartag_counts$Unique_Eartag_Count[2] + 1, label = "4", size = 2, vjust = -0.5) +
+  annotate("text", x = 3, y = location_eartag_counts$Unique_Eartag_Count[3] + 1, label = "8", size = 2, vjust = -0.5) +
+  annotate("text", x = 4, y = location_eartag_counts$Unique_Eartag_Count[4] + 1, label = "3", size = 2, vjust = -0.5) +
+  annotate("text", x = 5, y = location_eartag_counts$Unique_Eartag_Count[5] + 1, label = "11", size = 2, vjust = -0.5) +
+  annotate("text", x = 6, y = location_eartag_counts$Unique_Eartag_Count[6] + 1, label = "11", size = 2, vjust = -0.5) +
+  annotate("text", x = 7, y = location_eartag_counts$Unique_Eartag_Count[7] + 1, label = "11", size = 2, vjust = -0.5) +
+  annotate("text", x = 8, y = location_eartag_counts$Unique_Eartag_Count[8] + 1, label = "7", size = 2, vjust = -0.5) +
+  annotate("text", x = 9, y = location_eartag_counts$Unique_Eartag_Count[9] + 1, label = "11", size = 2, vjust = -0.5) +
+  annotate("text", x = 10, y = location_eartag_counts$Unique_Eartag_Count[10] + 1, label = "3", size = 2, vjust = -0.5) +
+  annotate("text", x = 11, y = location_eartag_counts$Unique_Eartag_Count[11] + 1, label = "8", size = 2, vjust = -0.5) +
+  annotate("text", x = 12, y = location_eartag_counts$Unique_Eartag_Count[12] + 1, label = "9", size = 2, vjust = -0.5) +
+  annotate("text", x = 13, y = location_eartag_counts$Unique_Eartag_Count[13] + 1, label = "7", size = 2, vjust = -0.5) +
+  annotate("text", x = 14, y = location_eartag_counts$Unique_Eartag_Count[14] + 1, label = "2", size = 2, vjust = -0.5) +
+  annotate("text", x = 15, y = location_eartag_counts$Unique_Eartag_Count[15] + 1, label = "13", size = 2, vjust = -0.5) +
   
   labs(title = "Number of Ear Tags observations per Location",
        x = "Location",
@@ -410,36 +413,45 @@ P4 <- ggplot(data= location_eartag_counts, aes(x=Location, y=Total_Eartag_Observ
 
 P4
 
-P5 <- ggplot(location_eartag_counts, aes(x=c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), y=Total_Eartag_Observations)) + 
-  geom_point() + geom_smooth(method="lm") + 
-  labs(title = "Number of Unique Ear Tags per Location",
-       x = "Number of connections",
-       y = "Number of Unique Ear Tags") +
+
+# unique ear tags per location --------------------------------------------
+ear_tag_locations <- Eartag_Dat %>%
+  dplyr::group_by(Eartag_N) %>%
+  dplyr::summarize(
+    n_locations = n_distinct(Location),
+    locations = paste(unique(Location), collapse = ", ")
+  )
+
+# Step 3: Separate tags found in only one location and in more than one
+tags_one_location <- ear_tag_locations %>%
+  dplyr::filter(n_locations == 1)
+
+tags_multiple_locations <- ear_tag_locations %>%
+  dplyr::filter(n_locations > 1)
+
+# Display results
+print("Tags found in only one location:")
+print(tags_one_location)
+
+print("Tags found in multiple locations:")
+print(tags_multiple_locations)
+
+# Combine the results for plotting
+plot_data <- ear_tag_locations %>%
+  dplyr::mutate(tag_category = ifelse(n_locations == 1, "One Location", "Multiple Locations"))
+
+# Plot
+ggplot(plot_data, aes(x = reorder(Eartag_N, -n_locations), y = n_locations, fill = tag_category)) +
+  geom_bar(stat = "identity") +
+  coord_flip() + # Flip coordinates for better readability
+  labs(
+    title = "Number of Locations for Each Eartag",
+    x = "Eartag Number",
+    y = "Number of Locations",
+    fill = "Tag Category"
+  ) +
   theme_minimal()
-P5
 
-# Fit a linear model to the data
-lm_model <- lm(Total_Eartag_Observations ~ c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), data = location_eartag_counts)
-summary(lm_model)
-# Extract the R-squared value from the model summary
-r_squared <- summary(lm_model)$r.squared
-
-# P5 plus r^2
-P6 <- ggplot(location_eartag_counts, aes(x = c(4,4,8,3,11,11,11,7,11,3,8,9,7,2,13), y = Total_Eartag_Observations)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE) + 
-  
-  # Add the R-squared value as an annotation
-  annotate("text", x = 10, y = max(location_eartag_counts$Total_Eartag_Observations) + 1, 
-           label = paste("R² =", round(r_squared, 2)), 
-           size = 5, hjust = 0) +
-  
-  labs(title = "Number of observations of Ear Tags per Location",
-       x = "Number of connections",
-       y = "Number of Ear Tag observations") +
-  theme_minimal()
-
-P6
 
 
 # Eartag analysis by month WITH MAP ------------------------------------------------
@@ -601,3 +613,18 @@ print(summary_wide)
 write.csv(summary_wide, "summary_galloway_cattle.csv", row.names = FALSE)
 
 
+
+
+# histogram of roe deer ---------------------------------------------------
+# filter to remove Animal and Galloway
+Roe_data <- Hart_data %>%
+  filter(Animal != "Galloway")
+
+P100 <- ggplot(data=Roe_data, aes(x=Animal)) +
+  geom_bar(fill="blue") +
+  labs(title = "Number of observations per Animal",
+       x = "Animal",
+       y = "Number of observations") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+P100

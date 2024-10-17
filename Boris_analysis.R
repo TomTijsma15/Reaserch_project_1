@@ -239,7 +239,8 @@ all_dat_median2 <- all_dat_median1 %>%
   )) %>%
   dplyr::group_by(Observation_id, Date, Behavior_group) %>%
   dplyr::summarize(median_Total_duration = sum(median_Total_duration, na.rm = TRUE)) %>%
-  dplyr::ungroup()
+  dplyr::ungroup() %>%
+  dplyr::mutate(Behavior_group = factor(Behavior_group, levels = c("vigilant", "non-vigilant", "agitated", "walking", "running", "other")))
 
 # Create the new dataframe by summarizing behaviors median percantage of time
 all_dat_median_P2 <- all_dat_median_P1 %>%
@@ -251,7 +252,8 @@ all_dat_median_P2 <- all_dat_median_P1 %>%
   )) %>%
   dplyr::group_by(Observation_id, Date, Behavior_group) %>%
   dplyr::summarize(median_P = sum(median_P, na.rm = TRUE)) %>%
-  dplyr::ungroup()
+  dplyr::ungroup() %>%
+  dplyr::mutate(Behavior_group = factor(Behavior_group, levels = c("vigilant", "non-vigilant", "agitated", "walking", "running", "Other")))
 
 
 # all data plot -------------------------------------------------------------------
