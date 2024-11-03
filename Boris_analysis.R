@@ -220,13 +220,16 @@ new_rows_P <- data.frame(
 all_dat_median1 <- rbind(all_dat_median, new_rows) %>%
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")),
          Behavior = factor(Behavior)
-  )
+  )%>%
+  dplyr::filter(Behavior != "other")
 
 ## add the new rows with 0's to the percentage of time dataframe
 all_dat_median_P1 <- rbind(all_dat_median_P, new_rows_P) %>%
   mutate(Observation_id = factor(Observation_id, levels = c("Before", "During", "After")),
          Behavior = factor(Behavior)
-  )
+  ) %>%
+  dplyr::filter(Behavior != "other")
+
 
 
 # Create the new dataframe by summarizing behaviors median percantage of time
@@ -240,7 +243,11 @@ all_dat_median2 <- all_dat_median1 %>%
   dplyr::group_by(Observation_id, Date, Behavior_group) %>%
   dplyr::summarize(median_Total_duration = sum(median_Total_duration, na.rm = TRUE)) %>%
   dplyr::ungroup() %>%
-  dplyr::mutate(Behavior_group = factor(Behavior_group, levels = c("vigilant", "non-vigilant", "agitated", "walking", "running", "other")))
+  dplyr::mutate(Behavior_group = factor(Behavior_group, levels = c("vigilant", "non-vigilant", "agitated", "walking", "running", "other"))) %>%
+  tidyr::complete(Observation_id, Date, Behavior_group, fill = list(median_Total_duration = 0)) %>%
+  dplyr::filter(Behavior_group != "other")
+  
+
 
 # Create the new dataframe by summarizing behaviors median percantage of time
 all_dat_median_P2 <- all_dat_median_P1 %>%
@@ -272,14 +279,18 @@ P1
 P2 <- ggplot(data=all_dat_median2, aes(x=Behavior_group, y=median_Total_duration, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("Median time of behaviors") + 
-  labs(x = "Behavior", y = "Median total time", fill = "Observation Period") +  
+  ggtitle("Time spend per behavior, grouped") + 
+  labs(x = "Behavior", y = "Median total time (sec)", fill = "Observation period") +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
+  facet_grid(rows = vars(Date), switch = "both", scales = "free_x") +  # Use facet_grid for better axis label control
   geom_vline(xintercept = seq(1.5, length(unique(all_dat_median2$Behavior_group)) - 0.5, by = 1), 
              linetype = "dotted", color = "black", linewidth = 0.5) + 
   theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
-        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
+        axis.ticks.length.x = unit(0.25, "cm"),
+        strip.placement = "outside") +  # Place facet labels outside the plot
+  scale_x_discrete(expand = expansion(mult = c(0.1, 0.1))) + # Add space on the sides of x-axis
+  scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"),
+                    labels = c("Before (-20 videos)", "During", "After (+20 videos)"))  # Colorblind-friendly palette
 
 
 P2
@@ -288,54 +299,33 @@ P2
 P2.5 <- ggplot(data=all_dat_median1, aes(x=Behavior, y=median_Total_duration, fill=Observation_id)) + 
   geom_col(position="dodge") + 
   theme_minimal() +
-  ggtitle("Median time of behaviors") + 
-  labs(x = "Behavior", y = "Median total time", fill = "Observation Period") +  
+  ggtitle("Time spend per behavior, ungrouped") + 
+  labs(x = "Behavior", y = "Median total time (sec)", fill = "Observation Period") +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
-  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median2$Behavior_group)) - 0.5, by = 1), 
+  facet_grid(rows = vars(Date), switch = "both", scales = "free_x") +  # Use facet_grid for better axis label control
+  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median1$Behavior)) - 0.5, by = 1), 
              linetype = "dotted", color = "black", linewidth = 0.5) + 
   theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
-        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
-
+        axis.ticks.length.x = unit(0.25, "cm"),
+        strip.placement = "outside") +  # Place facet labels outside the plot
+  scale_x_discrete(expand = expansion(mult = c(0.1, 0.1))) +  # Add space on the sides of x-axis
+  scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"),
+                    labels = c("Before (-20 videos)", "During", "After (+20 videos)"))  # Colorblind-friendly palette
 
 P2.5
-# median behavior percentage of time grouped
-P3 <- ggplot(data=all_dat_median_P2, aes(x=Behavior_group, y=median_P, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  theme_minimal() +
-  ggtitle("Median percentage time of behaviors") + 
-  labs(x = "Behavior", y = "Median percentage of time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
-  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median_p2$Behavior_group)) - 0.5, by = 1), 
-             linetype = "dotted", color = "black", linewidth = 0.5) + 
-  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
-        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
-
-
-P3
-# median behavior percentage of time ungrouped
-P3.5 <- ggplot(data=all_dat_median_P1, aes(x=Behavior, y=median_P, fill=Observation_id)) + 
-  geom_col(position="dodge") + 
-  theme_minimal() +
-  ggtitle("Median percentage time of behaviors") + 
-  labs(x = "Behavior", y = "Median percentage of time", fill = "Observation Period") +  
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  facet_wrap(~ Date, scales = "free_x") +  # Facet by Date, with separate scales for x-axis
-  geom_vline(xintercept = seq(1.5, length(unique(all_dat_median_p2$Behavior_group)) - 0.5, by = 1), 
-             linetype = "dotted", color = "black", linewidth = 0.5) + 
-  theme(axis.ticks.x = element_line(linewidth = 0.8),   # Add thicker x-axis ticks
-        axis.ticks.length.x = unit(0.25, "cm"))    # Set the length of x-axis ticks
-
-
-P3.5
 
 # non-parametric test for median duration of behavior ---------------------
 # kruskal wallis test (non parametric ANOVA)
-kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median2)
+kruskal.test(median_Total_duration ~ Observation_id, data = all_dat_median1)
 
 # post hoc test, Dunns test
 dunnTest(median_Total_duration ~ Observation_id, data = all_dat_median2, method = "bonferroni")
 
+
+## use only vigilant and non-vigilant for better comparison
+vigilant_nonvigilant_df <- all_dat_median2 %>%
+  dplyr::filter(Behavior_group %in% c("vigilant", "non-vigilant"))
+
+kruskal.test(median_Total_duration ~ Observation_id, data = vigilant_nonvigilant_df)
 
 

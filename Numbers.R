@@ -52,12 +52,14 @@ sample_sizes <- bef_af1 %>%
 P1 <- ggplot(bef_af1, aes(x = Event, y = N_Animals)) +
   geom_boxplot() +
   geom_jitter(width = 0.15, alpha = 0.5) +
-  labs(title = "Number of Galloway in frame/video for different wolf events",
-       x = " Wolf event",
-       y = " Maximum number of Galloway in frame/video",
+  labs(title = "Difference in number of Galloway per video between observation periods",
+       x = "Obseravtion period",
+       y = "Number of Galloway per video",
        fill = "Location") +  # Changed color to fill for legend
   theme_minimal() +                 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  scale_x_discrete(labels = c("Before (-24h)", "During", "After (+24h)"))  # Replace with desired labels
+
 P1
 
 # nuber of animals analysis
